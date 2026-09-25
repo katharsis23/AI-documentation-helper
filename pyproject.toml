@@ -1,0 +1,79 @@
+[project]
+name = "documentation-helper"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "katharsis23", email = "daniklv2006@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.13, <=3.14"
+dependencies = [
+    "pydantic (>=2.13.5,<3.0.0)",
+    "pydantic-settings (>=2.15.0,<3.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "asyncio (>=4.0.0,<5.0.0)",
+    "logger (>=1.4,<2.0)",
+    "fastapi (>=0.141.1,<0.142.0)",
+    "fastapi-cbv (>=0.2.0,<0.3.0)",
+    "uvicorn (>=0.54.0,<0.55.0)"
+]
+
+[tool.poetry]
+packages = [{include = "documentation_helper", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[dependency-groups]
+dev = [
+    "pytest (>=9.1.1,<10.0.0)",
+    "ruff (>=0.16.9,<0.17.0)",
+    "invoke (>=2.2.0)"
+]
+
+# =========== Ruff Config ============
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+indent-width = 4
+
+# Cleaned up list of relevant exclusions
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "build",
+    "dist",
+    "venv",
+]
+
+[tool.ruff.lint]
+# Selected Rules optimized for FastAPI & Modern Python:
+# E/W = pycodestyle, F = Pyflakes, I = isort, B = Bugbear, UP = PyUpgrade
+# N = PEP8 Naming, ASYNC = Asyncio linting, RUF = Ruff-specific rules
+select = ["E", "W", "F", "I", "B", "UP", "N", "ASYNC", "RUF"]
+ignore = [
+    "E501",   # Ignore line-too-long (handled cleanly by ruff format)
+]
+
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore unused imports in init files (common for package exports)
+"__init__.py" = ["F401"]
+# Allow asset statements and ignore naming conventions in unit tests
+"tests/**/*.py" = ["S101", "N802", "N806"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+# Automatically formats Python snippets hidden inside your docstrings!
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
