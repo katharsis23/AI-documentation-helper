@@ -15,7 +15,8 @@ dependencies = [
     "logger (>=1.4,<2.0)",
     "fastapi (>=0.141.1,<0.142.0)",
     "fastapi-cbv (>=0.2.0,<0.3.0)",
-    "uvicorn (>=0.54.0,<0.55.0)"
+    "uvicorn (>=0.54.0,<0.55.0)",
+    "markitdown (>=0.1.8,<0.2.0)"
 ]
 
 [tool.poetry]
