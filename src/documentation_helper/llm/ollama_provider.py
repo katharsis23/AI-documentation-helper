@@ -1,34 +1,21 @@
 import httpx as http
-import asyncio
-from pydantic import HttpUrl, SecretStr
 from logger import logger
+from pydantic import HttpUrl, SecretStr
+
 
 class OllamaProvider:
-    def __init__(
-            self,
-            url: HttpUrl,
-            model: str,
-            api_key: SecretStr | None
-    ):
+    def __init__(self, url: HttpUrl, model: str, api_key: SecretStr | None):
         self.model = model
-        self.url = url
-        self.api_key = api_key
+        self.url = str(url)
+        self.api_key = api_key.get_secret_value()
 
-
-
-    async def query(self, user_prompt: str):
+    async def query(self, prompt: str):
         try:
             async with http.AsyncClient() as client:
                 response = await client.post(
                     url=self.url,
-                    content={
-                        "model": self.model,
-                        "prompt": user_prompt,
-                        "stream": False
-                    },
-                    headers={
-                        'Content-Type': 'application/json'
-                    }
+                    content={"model": self.model, "prompt": prompt, "stream": False},
+                    headers={"Content-Type": "application/json"},
                 )
                 if response.status_code == 200:
                     raise NotImplementedError(
@@ -37,6 +24,4 @@ class OllamaProvider:
                 else:
                     raise Exception
         except Exception as e:
-            logger.error(
-                msg=f"Could not send request to Ollama. {e}"
-            )
+            logger.error(msg=f"Could not send request to Ollama. {e}")

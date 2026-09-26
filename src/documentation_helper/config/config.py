@@ -18,9 +18,7 @@ class Config(BaseSettings):
     deepseek_model: str | None = Field(default="None")
 
     model_config = SettingsConfigDict(
-        env_file="./.env", 
-        env_file_encoding="utf-8",
-        extra="ignore"
+        env_file="./.env", env_file_encoding="utf-8", extra="ignore"
     )
 
     @model_validator(mode="after")
@@ -37,7 +35,10 @@ class Config(BaseSettings):
             # Looking for key in .env
             if env_key:
                 self.deepseek_api_key = SecretStr(env_key)
-            elif not self.deepseek_api_key or not self.deepseek_api_key.get_secret_value():
+            elif (
+                not self.deepseek_api_key
+                or not self.deepseek_api_key.get_secret_value()
+            ):
                 raise ValueError(
                     "DEEPSEEK_API_KEY is not found in OS/Shell environment! "
                     "Please run: export DEEPSEEK_API_KEY='your_key'"
@@ -57,7 +58,10 @@ class Config(BaseSettings):
     @property
     def active_model(self) -> str:
         """Returns activa model"""
-        selected_model = self.model if self.ai_provider == "ollama" else self.deepseek_model
+        selected_model = (
+            self.model if self.ai_provider == "ollama" else self.deepseek_model
+        )
         return selected_model or ""
+
 
 config = Config()

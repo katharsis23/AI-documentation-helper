@@ -34,7 +34,7 @@ The goal of the course project is not to train an LLM from scratch, but to build
 | Markdown parsing | standard parser (markdown-it-py / regex over headings) |
 | Embeddings | local model (e.g. `sentence-transformers/all-MiniLM-L6-v2` or `bge-small`) |
 | LLM generation | local model via Ollama (Llama 3.1 / Qwen2.5) or a cloud OpenAI-compatible API |
-| Implementation language | Python 3.11+ |
+| Implementation language | Python 3.13+ |
 
 ---
 

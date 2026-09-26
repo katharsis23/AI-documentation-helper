@@ -1,4 +1,5 @@
-from src.documentation_helper.config import config, Config
+from src.documentation_helper.config import Config
+
 
 class RAGPipeline:
     def __init__(
@@ -9,6 +10,5 @@ class RAGPipeline:
         embedding_provider,
         vector_store,
         llm_provider,
-        prompt_builder
-    ):
-        ...
+        prompt_builder,
+    ): ...

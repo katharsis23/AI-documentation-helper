@@ -1,4 +1,4 @@
 class MDParser:
     """Parses MD files"""
-    def parse(self, filepath: str):
-        ...
+
+    def parse(self, filepath: str): ...

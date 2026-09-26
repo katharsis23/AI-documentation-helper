@@ -1,10 +1,13 @@
-from typing import Protocol
-from pydantic import BaseModel
-from uuid import uuid4
 from hashlib import sha256
+from typing import Protocol
+from uuid import uuid4
+
+from pydantic import BaseModel
+
 
 class IChunker(Protocol):
     """Split documents into chunks"""
+
     ...
 
 
