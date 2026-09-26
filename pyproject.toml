@@ -58,6 +58,7 @@ exclude = [
 select = ["E", "W", "F", "I", "B", "UP", "N", "ASYNC", "RUF"]
 ignore = [
     "E501",   # Ignore line-too-long (handled cleanly by ruff format)
+    "RUF012",
 ]
 
 fixable = ["ALL"]

@@ -88,4 +88,3 @@ def test_text_before_first_heading_is_captured_as_intro(tmp_path: Path) -> None:
 def test_missing_file_raises(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError):
         MDParser().parse(str(tmp_path / "does-not-exist.md"))
-
