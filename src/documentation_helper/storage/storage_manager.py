@@ -1,0 +1,20 @@
+class StorageManager:
+    """High level class that chooses DB provider and gives the context"""
+
+    def add(self, document):
+        ...
+
+    def search(self, query_vector):
+        ...
+
+    def list_documents(self):
+        ...
+
+    def get_path_to_documents(self):
+        ...
+
+    def context_manager(self):
+        ...
+
+    def get_db(self):
+        ...
