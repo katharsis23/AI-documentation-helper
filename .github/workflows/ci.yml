@@ -32,7 +32,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-ansi
+        run: poetry lock && poetry install --no-interaction --no-ansi
 
       - name: Ruff lint
         run: poetry run ruff check .
@@ -61,7 +61,7 @@ jobs:
           cache: poetry
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-ansi
+        run: poetry lock && poetry install --no-interaction --no-ansi
 
       - name: Run pytest
         run: poetry run pytest -q
