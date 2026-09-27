@@ -17,7 +17,9 @@ dependencies = [
     "fastapi-cbv (>=0.2.0,<0.3.0)",
     "uvicorn (>=0.54.0,<0.55.0)",
     "markitdown (>=0.1.8,<0.2.0)",
-    "sqlite-vec (>=0.1.9,<0.2.0)"
+    "sqlite-vec (>=0.1.9,<0.2.0)",
+    "python-multipart (>=0.0.32,<0.0.33)",
+    "pytest-asyncio (>=1.4.0,<2.0.0)",
 ]
 
 [tool.poetry]
@@ -80,3 +82,8 @@ line-ending = "auto"
 # Automatically formats Python snippets hidden inside your docstrings!
 docstring-code-format = true
 docstring-code-line-length = "dynamic"
+
+
+# +======== Pytest ==============
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

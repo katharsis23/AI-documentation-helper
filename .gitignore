@@ -26,3 +26,5 @@ share/python-wheels/
 MANIFEST
 
 .ruff_cache/
+
+data/**

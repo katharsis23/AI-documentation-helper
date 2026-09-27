@@ -25,14 +25,25 @@ class Config(BaseSettings):
     deepseek_model: str | None = Field(default="None")
 
     # Embedding
+    embedding_provider: Literal["ollama", "deepseek"] = Field(default="ollama")
+    # Which backend produces embeddings. Kept separate from ``ai_provider``
+    # because generation and embedding routinely use different models/servers
+    # (e.g. chat via DeepSeek, embeddings via a local Ollama).
     embedding_model: str | None = Field(default=None)
-    # Any available Ollama model
-    embedding_dim: int = Field(default=384)
-    # Vector dimension of the embedding model (all-MiniLM-L6-v2 -> 384)
+    embedding_url: HttpUrl | None = Field(default=None)
+    # Optional override; falls back to the embedding provider's default URL.
+    embedding_dim: int = Field(default=1024)
+    # Vector dimension of the embedding model (all-MiniLM-L6-v2 -> 384,
+    # bge-m3 -> 1024). MUST match the model actually in use, and the stored
+    # vec0 table is fixed at creation, so changing it requires re-indexing.
+    embedding_batch_size: int = Field(default=16)
+    # How many chunks go into a single embedding request. Smaller values use
+    # less peak RAM (long sequences), larger values improve GPU throughput.
 
     # Storage
     db_provider: str = Field(default="sqlite")
     # TODO: Add Literal with possible types
+    # TODO: also consider adding db_url in future
     db_path: str = Field(default="./data/vector_store.db")
     uploads_dir: str = Field(default="./data/uploads")
 
@@ -77,6 +88,19 @@ class Config(BaseSettings):
                     "Please run: export DEEPSEEK_API_KEY='your_key'"
                 )
 
+        if self.embedding_provider == "ollama":
+            if not self.ollama_url:
+                raise ValueError("Missed `ollama_url` for `ollama` embedding provider")
+        elif self.embedding_provider == "deepseek":
+            if not self.deepseek_url:
+                raise ValueError(
+                    "Missed `deepseek_url` for `deepseek` embedding provider"
+                )
+            if not self.embedding_model:
+                raise ValueError(
+                    "Missed `embedding_model` for `deepseek` embedding provider"
+                )
+
         return self
 
     # =========================================================================
@@ -95,6 +119,39 @@ class Config(BaseSettings):
             self.ollama_model if self.ai_provider == "ollama" else self.deepseek_model
         )
         return selected_model or ""
+
+    @property
+    def embedding_base_url(self) -> str:
+        """Returns the URL of the active *embedding* provider.
+
+        An explicit ``embedding_url`` always wins; otherwise the default URL of
+        the selected embedding provider is used.
+        """
+        if self.embedding_url:
+            return str(self.embedding_url)
+        url = (
+            self.ollama_url
+            if self.embedding_provider == "ollama"
+            else self.deepseek_url
+        )
+        return str(url) if url else ""
+
+    @property
+    def embedding_api_key(self) -> SecretStr | None:
+        """Returns the API key needed by the embedding provider (if any)."""
+        if self.embedding_provider == "deepseek":
+            return self.deepseek_api_key
+        return None
+
+    @property
+    def active_embedding_model(self) -> str:
+        """Returns the model used to produce embeddings."""
+        default = (
+            self.ollama_model
+            if self.embedding_provider == "ollama"
+            else self.deepseek_model
+        )
+        return self.embedding_model or default or ""
 
 
 config = Config()

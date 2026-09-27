@@ -1,12 +1,3 @@
-"""Local embedding provider.
-
-Implements :class:`~documentation_helper.protocols.embedding.IEmbeddingProvider`.
-The provider is deliberately thin: it does not know *how* a model produces a
-vector. It receives an already-built model backend (e.g. ``OllamaProvider``)
-that exposes ``post_embedding()`` and only orchestrates batch vs. single-query
-embedding on top of it.
-"""
-
 from __future__ import annotations
 
 from src.documentation_helper.protocols.embedding import (
@@ -28,7 +19,19 @@ class LocalEmbeddingProvider(IEmbeddingProvider):
         self.backend = backend
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
-        """Embeds a batch of documents (chunks) during ingestion."""
+        """Embeds a batch of documents (chunks) during ingestion.
+
+        If the backend supports batch embedding (``post_embeddings``) it is
+        used so ingestion issues one request per batch instead of one request
+        per chunk. Otherwise we fall back to embedding the texts one by one.
+        """
+        if not texts:
+            return []
+
+        post_embeddings = getattr(self.backend, "post_embeddings", None)
+        if callable(post_embeddings):
+            return await post_embeddings(texts)
+
         return [await self.backend.post_embedding(text) for text in texts]
 
     async def embed_query(self, text: str) -> list[float]:

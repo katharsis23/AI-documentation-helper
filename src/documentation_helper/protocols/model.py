@@ -5,16 +5,16 @@ from pydantic import BaseModel
 
 
 # ====== Query =========
-class QueryResponse(BaseModel):
-    answer: str
-    sources: list  # List of Source References
-
-
 class SourceReference(BaseModel):
     source_file: str
-    section_header: str
-    page_number: int
+    section_header: str = ""
+    page_number: int = 1
     relevance_score: float
+
+
+class QueryResponse(BaseModel):
+    answer: str
+    sources: list[SourceReference] = []
 
 
 # ========= Ingest ==========
@@ -37,12 +37,12 @@ class DocumentUploadResponse(BaseModel):
 # ======== Requests =========
 class QueryRequest(BaseModel):
     question: str
-    top_k: int
-    filters: dict
+    top_k: int = 5
+    filters: dict = {}
 
 
 class DocumentInfo(BaseModel):
     doc_id: UUID
     filename: str
-    uploaded_at: datetime
+    uploaded_at: datetime.datetime
     chunk_count: int
