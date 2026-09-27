@@ -1,4 +1,5 @@
-from uuid import uuid4
+import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -20,5 +21,28 @@ class SourceReference(BaseModel):
 
 
 class IngestResult(BaseModel):
-    doc_id: uuid4
+    doc_id: UUID
     chunks_created: int
+
+
+# ======== Responses ========
+
+
+class DocumentUploadResponse(BaseModel):
+    doc_id: UUID
+    status: str
+    chunks_created: int
+
+
+# ======== Requests =========
+class QueryRequest(BaseModel):
+    question: str
+    top_k: int
+    filters: dict
+
+
+class DocumentInfo(BaseModel):
+    doc_id: UUID
+    filename: str
+    uploaded_at: datetime
+    chunk_count: int

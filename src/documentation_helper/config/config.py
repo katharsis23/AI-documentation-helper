@@ -1,25 +1,58 @@
 import os
 from typing import Literal
 
-from pydantic import Field, HttpUrl, SecretStr, model_validator
+from pydantic import (
+    Field,
+    HttpUrl,
+    SecretStr,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Config(BaseSettings):
-    ai_provider: Literal["ollama", "deepseek"] = "ollama"
+    ai_provider: Literal["ollama", "deepseek"] = Field(default="ollama")
 
     # Ollama settings
     ollama_url: HttpUrl | None = Field(default="http://localhost:11434")
-    model: str | None = Field(default="None")
+    ollama_model: str | None = Field(default="None")
 
     # Deepseek settings
     deepseek_url: HttpUrl | None = Field(default="https://api.deepseek.com")
     deepseek_api_key: SecretStr | None = Field(default=None)
     deepseek_model: str | None = Field(default="None")
 
+    # Embedding
+    embedding_model: str | None = Field(default=None)
+    # Any available Ollama model
+    embedding_dim: int = Field(default=384)
+    # Vector dimension of the embedding model (all-MiniLM-L6-v2 -> 384)
+
+    # Storage
+    db_provider: str = Field(default="sqlite")
+    # TODO: Add Literal with possible types
+    db_path: str = Field(default="./data/vector_store.db")
+    uploads_dir: str = Field(default="./data/uploads")
+
     model_config = SettingsConfigDict(
         env_file="./.env", env_file_encoding="utf-8", extra="ignore"
     )
+
+    @field_validator("*", mode="before")
+    @classmethod
+    def empty_string_uses_default(cls, value: object, info: ValidationInfo) -> object:
+        """Treat empty env values (e.g. ``OLLAMA_URL=``) as "unset".
+
+        An empty string is replaced with the field default, so a blank entry in
+        ``.env`` does not override a sensible default (nor break ``HttpUrl``
+        validation).
+        """
+        if isinstance(value, str) and not value.strip():
+            field = cls.model_fields.get(info.field_name)
+            return field.default if field is not None else None
+        return value
 
     @model_validator(mode="after")
     def validate_and_load_provider_config(self) -> "Config":
@@ -59,7 +92,7 @@ class Config(BaseSettings):
     def active_model(self) -> str:
         """Returns activa model"""
         selected_model = (
-            self.model if self.ai_provider == "ollama" else self.deepseek_model
+            self.ollama_model if self.ai_provider == "ollama" else self.deepseek_model
         )
         return selected_model or ""
 

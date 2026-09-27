@@ -25,3 +25,22 @@ class OllamaProvider:
                     raise Exception
         except Exception as e:
             logger.error(msg=f"Could not send request to Ollama. {e}")
+
+    async def post_embedding(self, text: str) -> list[float]:
+        """Requests an embedding vector for ``text`` from the Ollama server.
+
+        Returns the raw vector so that callers (e.g. an embedding provider)
+        stay free of the concrete transfer/realization details.
+        """
+        try:
+            async with http.AsyncClient() as client:
+                response = await client.post(
+                    url=f"{self.url}/api/embeddings",
+                    json={"model": self.model, "prompt": text},
+                    headers={"Content-Type": "application/json"},
+                )
+                response.raise_for_status()
+                return response.json().get("embedding", [])
+        except Exception as e:
+            logger.error(msg=f"Could not fetch embedding from Ollama. {e}")
+            raise
