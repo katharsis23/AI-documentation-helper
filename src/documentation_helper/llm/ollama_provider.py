@@ -3,6 +3,7 @@ from logger import logger
 from pydantic import HttpUrl, SecretStr
 
 from src.documentation_helper.config import config
+from src.documentation_helper.protocols.llm import LLMResponse
 
 
 class OllamaProvider:
@@ -24,7 +25,13 @@ class OllamaProvider:
         # to spike RAM or hit the request timeout on big documents.
         self.embed_batch_size = embed_batch_size or config.embedding_batch_size
 
-    async def query(self, prompt: str):
+    async def query(self, prompt: str) -> LLMResponse:
+        """Generates a completion for ``prompt`` using ``/api/generate``.
+
+        Sends a non-streaming request to Ollama and maps the raw JSON answer
+        (``{"response": "...", ...}``) onto the provider-agnostic
+        :class:`LLMResponse`, mirroring the DeepSeek provider's contract.
+        """
         try:
             async with http.AsyncClient(timeout=self.timeout) as client:
                 response = await client.post(
@@ -32,14 +39,15 @@ class OllamaProvider:
                     json={"model": self.model, "prompt": prompt, "stream": False},
                     headers={"Content-Type": "application/json"},
                 )
-                if response.status_code == 200:
-                    raise NotImplementedError(
-                        "Ollama request handler has not been implemented yet"
-                    )
-                else:
-                    raise Exception
+                response.raise_for_status()
+                raw_json = response.json()
+                return LLMResponse(
+                    text=raw_json["response"],
+                    raw_response=raw_json,
+                )
         except Exception as e:
             logger.error(msg=f"Could not send request to Ollama. {e}")
+            raise
 
     async def post_embedding(self, text: str) -> list[float]:
         """Requests an embedding vector for a single ``text``.

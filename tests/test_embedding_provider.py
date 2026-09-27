@@ -1,6 +1,5 @@
 """Tests for :class:`documentation_helper.embedding_provider.LocalEmbeddingProvider`."""
 
-
 from src.documentation_helper.embedding_provider import LocalEmbeddingProvider
 
 
