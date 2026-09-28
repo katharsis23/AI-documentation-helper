@@ -28,3 +28,4 @@ MANIFEST
 .ruff_cache/
 
 data/**
+.coverage
